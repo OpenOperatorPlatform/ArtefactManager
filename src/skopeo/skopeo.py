@@ -6,35 +6,34 @@ from typing import Optional
 class SkopeoClient:
     """
     Skopeo client that sends requests to the Skopeo CLI to interact with
-    container registries.
+    artefact registries.
     """
     @staticmethod
-    def image_exists(
+    def artefact_exists(
         registry_url: str,
-        image_name: str,
-        image_tag: str,
+        artefact_name: str,
+        artefact_tag: str,
         username: Optional[str] = None,
         password: Optional[str] = None
     ) -> bool:
         """
-        Checks if a specific image tag exists in a container
+        Checks if a specific artefact tag exists in a artefact registry
         registry using Skopeo.
 
         :param registry_url: The base registry URL including the project
                              (e.g., registry.example.com/project)
-        :param image_name: The image name (e.g., nginx)
-        :param image_tag: The image tag to check (e.g., latest)
+        :param artefact_name: The artefact name (e.g., nginx)
+        :param artefact_tag: The artefact tag to check (e.g., latest)
         :param username: Optional username for authentication
         :param password: Optional password for authentication
-        :return: True if the image exists, False if it does not.
+        :return: True if the artefact exists, False if it does not.
         :raises RuntimeError: If authentication fails, repository does not
                               exist, or connectivity issues occur.
         """
-        full_repo_url = f"{registry_url.rstrip('/')}/{image_name}"
+        full_repo_url = f"{registry_url.rstrip('/')}/{artefact_name}"
         skopeo_command = [
-            "skopeo", "inspect", f"docker://{full_repo_url}:{image_tag}"
-        ]
-
+            "skopeo", "inspect", f"docker://{full_repo_url}:{artefact_tag}"
+        ]    
         if username and password:
             skopeo_command.extend(["--creds", f"{username}:{password}"])
 
@@ -45,7 +44,7 @@ class SkopeoClient:
                 capture_output=True,
                 text=True
             )
-            return True  # If the command succeeds, the image exists
+            return True  # If the command succeeds, the artefact exists
 
         except subprocess.CalledProcessError as e:
             error_message = e.stderr.strip().lower()
@@ -58,16 +57,20 @@ class SkopeoClient:
             ):
                 raise PermissionError(
                     (
-                        "Authentication failed: Invalid username or "
-                        "password."
+                        (
+                            "Authentication failed: Invalid username or "
+                            "password."
+                        )
                     )
                 )
+            if "not found" in error_message:
                 raise RuntimeError(
-                    f"Image '{image_name}' not found in '{registry_url}'."
-                )
-            if "project" in error_message and "not found" in error_message:
-                raise RuntimeError(
-                    f"Image '{image_name}' not found in '{registry_url}'."
+                    (
+                        (
+                            f"Artefact {artefact_name}:{artefact_tag} not "
+                            f"found in {registry_url}"
+                        )
+                    )
                 )
 
                 raise RuntimeError(
@@ -97,31 +100,31 @@ class SkopeoClient:
             raise RuntimeError("Failed to parse Skopeo output")
 
     @staticmethod
-    def copy_image(
+    def copy_artefact(
         src_registry: str,
-        src_image_name: str,
-        src_image_tag: str,
+        src_artefact_name: str,
+        src_artefact_tag: str,
         dst_registry: str,
-        dst_image_name: str,
-        dst_image_tag: str,
+        dst_artefact_name: str,
+        dst_artefact_tag: str,
         src_username: Optional[str] = None,
         src_password: Optional[str] = None,
         dst_username: Optional[str] = None,
         dst_password: Optional[str] = None
     ) -> bool:
         """
-        Copies a container image from one registry to another using Skopeo.
+        Copies an artefact from one registry to another using Skopeo.
         """
         src_url = (
             (
                 f"docker://{src_registry.rstrip('/')}/"
-                f"{src_image_name}:"
-                f"{src_image_tag}"
+                f"{src_artefact_name}:"
+                f"{src_artefact_tag}"
             )
         )
         dst_url = (
             f"docker://{dst_registry.rstrip('/')}/"
-            f"{dst_image_name}:{dst_image_tag}"
+            f"{dst_artefact_name}:{dst_artefact_tag}"
         )
 
         skopeo_command = [
@@ -148,7 +151,7 @@ class SkopeoClient:
                 capture_output=True,
                 text=True
             )
-            return True  # If the command succeeds, the image was copied
+            return True  # If the command succeeds, the artefact was copied
 
         except subprocess.CalledProcessError as e:
             error_message = e.stderr.strip().lower()
@@ -159,10 +162,12 @@ class SkopeoClient:
                     "Authentication failed: Invalid username or password."
                 )
 
-            if "no such image" in error_message:
+            if "no such artefact" in error_message:
                 raise RuntimeError(
-                    f"Source image '{src_image_name}:{src_image_tag}' "
-                    f"not found in '{src_registry}'."
+                    (
+                        f"Source artefact '{src_artefact_name}:"
+                        f"{src_artefact_tag}' not found in '{src_registry}'."
+                    )
                 )
 
             if (
@@ -182,4 +187,4 @@ class SkopeoClient:
                     f"'{src_registry}' or '{dst_registry}'."
                 )
 
-            raise RuntimeError(f"Image copy failed: {error_message}")
+            raise RuntimeError(f"Artefact copy failed: {error_message}")

@@ -4,14 +4,14 @@ from . import schemas
 from src.skopeo.skopeo import SkopeoClient
 
 app = FastAPI(
-    title="Artifact Manager API",
-    description="WIP API for managing artifacts using Skopeo.",
+    title="Artefact Manager API",
+    description="WIP API for managing artefacts using Skopeo.",
     version="0.1.0",
     openapi_tags=[
         {
-            "name": "Artifact Management",
+            "name": "Artefact Management",
             "description": (
-                "Operations related to artifact management in container "
+                "Operations related to artefact management "
                 "registries."
             )
         }
@@ -24,24 +24,24 @@ def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
 
-@app.post("/image-exists", tags=["Artifact Management"])
-def image_exists(
-    artifact: schemas.PostImageExists
-) -> schemas.PostImageExistsResponse:
+@app.post("/artefact-exists", tags=["Artefact Management"])
+def artefact_exists(
+    artefact: schemas.PostArtefactExists
+) -> schemas.PostArtefactExistsResponse:
     # Return type annotation for the endpoint
     """
     API endpoint to check if a Helm Chart or container image with a specific
     tag exists in a repository.
     """
     try:
-        exists = SkopeoClient.image_exists(
-            registry_url=artifact.registry_url,
-            image_name=artifact.image_name,
-            image_tag=artifact.image_tag,
-            username=artifact.username,
-            password=artifact.password
+        exists = SkopeoClient.artefact_exists(
+            registry_url=artefact.registry_url,
+            artefact_name=artefact.artefact_name,
+            artefact_tag=artefact.artefact_tag,
+            username=artefact.registry_username,
+            password=artefact.registry_password
         )
-        return schemas.PostImageExistsResponse(exists=exists)
+        return schemas.PostArtefactExistsResponse(exists=exists)
 
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -54,34 +54,37 @@ def image_exists(
         )
 
 
-@app.post("/copy-image", tags=["Artifact Management"])
-def copy_image(
-    artifact: schemas.PostCopyImage
-) -> schemas.PostCopyImageResponse:
+@app.post("/copy-artefact", tags=["Artefact Management"])
+def copy_artefact(
+    artefact: schemas.PostCopyArtefact
+) -> schemas.PostCopyArtefactResponse:
     """
     API Endpoint to copy a Helm Chart/container image from one registry
     to another.
     """
     try:
-        success = SkopeoClient.copy_image(
-            src_registry=artifact.src_registry,
-            src_image_name=artifact.src_image_name,
-            src_image_tag=artifact.src_image_tag,
-            dst_registry=artifact.dst_registry,
-            dst_image_name=artifact.dst_image_name,
-            dst_image_tag=artifact.dst_image_tag,
-            src_username=artifact.src_username,
-            src_password=artifact.src_password,
-            dst_username=artifact.dst_username,
-            dst_password=artifact.dst_password
+        dst_name = artefact.dst_artefact_name or artefact.src_artefact_name
+        dst_tag = artefact.dst_artefact_tag or artefact.src_artefact_tag
+
+        success = SkopeoClient.copy_artefact(
+            src_registry=artefact.src_registry,
+            src_artefact_name=artefact.src_artefact_name,
+            src_artefact_tag=artefact.src_artefact_tag,
+            dst_registry=artefact.dst_registry,
+            dst_artefact_name=dst_name,
+            dst_artefact_tag=dst_tag,
+            src_username=artefact.src_username,
+            src_password=artefact.src_password,
+            dst_username=artefact.dst_username,
+            dst_password=artefact.dst_password
         )
-        return schemas.PostCopyImageResponse(success=success)
+        return schemas.PostCopyArtefactResponse(success=success)
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 # @app.post("/placeholder")
 # def placeholder(
-#     artifact: schemas.PostPlaceholder
+#     artefact: schemas.PostPlaceholder
 # ) -> schemas.PostPlaceholderResponse:
 #     raise HTTPException(status_code=501, detail="Not implemented")
