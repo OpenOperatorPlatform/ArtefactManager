@@ -13,8 +13,8 @@ class SkopeoClient:
         registry_url: str,
         artefact_name: str,
         artefact_tag: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None
+        registry_username: Optional[str] = None,
+        registry_password: Optional[str] = None
     ) -> bool:
         """
         Checks if a specific artefact tag exists in a artefact registry
@@ -24,8 +24,8 @@ class SkopeoClient:
                              (e.g., registry.example.com/project)
         :param artefact_name: The artefact name (e.g., nginx)
         :param artefact_tag: The artefact tag to check (e.g., latest)
-        :param username: Optional username for authentication
-        :param password: Optional password for authentication
+        :param registry_username: Optional registry username for authentication
+        :param registry_password: Optional password for authentication
         :return: True if the artefact exists, False if it does not.
         :raises RuntimeError: If authentication fails, repository does not
                               exist, or connectivity issues occur.
@@ -33,9 +33,9 @@ class SkopeoClient:
         full_repo_url = f"{registry_url.rstrip('/')}/{artefact_name}"
         skopeo_command = [
             "skopeo", "inspect", f"docker://{full_repo_url}:{artefact_tag}"
-        ]    
-        if username and password:
-            skopeo_command.extend(["--creds", f"{username}:{password}"])
+        ]
+        if registry_username and registry_password:
+            skopeo_command.extend(["--creds", f"{registry_username}:{registry_password}"])
 
         try:
             subprocess.run(
@@ -101,29 +101,29 @@ class SkopeoClient:
 
     @staticmethod
     def copy_artefact(
-        src_registry: str,
+        src_registry_url: str,
         src_artefact_name: str,
         src_artefact_tag: str,
-        dst_registry: str,
+        dst_registry_url: str,
         dst_artefact_name: str,
         dst_artefact_tag: str,
-        src_username: Optional[str] = None,
-        src_password: Optional[str] = None,
-        dst_username: Optional[str] = None,
-        dst_password: Optional[str] = None
+        src_registry_username: Optional[str] = None,
+        src_registry_password: Optional[str] = None,
+        dst_registry_username: Optional[str] = None,
+        dst_registry_password: Optional[str] = None
     ) -> bool:
         """
         Copies an artefact from one registry to another using Skopeo.
         """
         src_url = (
             (
-                f"docker://{src_registry.rstrip('/')}/"
+                f"docker://{src_registry_url.rstrip('/')}/"
                 f"{src_artefact_name}:"
                 f"{src_artefact_tag}"
             )
         )
         dst_url = (
-            f"docker://{dst_registry.rstrip('/')}/"
+            f"docker://{dst_registry_url.rstrip('/')}/"
             f"{dst_artefact_name}:{dst_artefact_tag}"
         )
 
@@ -134,14 +134,14 @@ class SkopeoClient:
             dst_url,
         ]
 
-        if src_username and src_password:
+        if src_registry_username and src_registry_password:
             skopeo_command.extend(
-                ["--src-creds", f"{src_username}:{src_password}"]
+                ["--src-creds", f"{src_registry_username}:{src_registry_password}"]
             )
 
-        if dst_username and dst_password:
+        if dst_registry_username and dst_registry_password:
             skopeo_command.extend(
-                ["--dest-creds", f"{dst_username}:{dst_password}"]
+                ["--dest-creds", f"{dst_registry_username}:{dst_registry_password}"]
             )
 
         try:
@@ -166,7 +166,7 @@ class SkopeoClient:
                 raise RuntimeError(
                     (
                         f"Source artefact '{src_artefact_name}:"
-                        f"{src_artefact_tag}' not found in '{src_registry}'."
+                        f"{src_artefact_tag}' not found in '{src_registry_url}'."
                     )
                 )
 
@@ -184,7 +184,7 @@ class SkopeoClient:
             ):
                 raise RuntimeError(
                     f"DNS resolution failed: Unable to resolve "
-                    f"'{src_registry}' or '{dst_registry}'."
+                    f"'{src_registry_url}' or '{dst_registry_url}'."
                 )
 
             raise RuntimeError(f"Artefact copy failed: {error_message}")

@@ -28,7 +28,6 @@ def redirect_to_docs():
 def artefact_exists(
     artefact: schemas.PostArtefactExists
 ) -> schemas.PostArtefactExistsResponse:
-    # Return type annotation for the endpoint
     """
     API endpoint to check if a Helm Chart or container image with a specific
     tag exists in a repository.
@@ -38,8 +37,8 @@ def artefact_exists(
             registry_url=artefact.registry_url,
             artefact_name=artefact.artefact_name,
             artefact_tag=artefact.artefact_tag,
-            username=artefact.registry_username,
-            password=artefact.registry_password
+            registry_username=artefact.registry_username,
+            registry_password=artefact.registry_password
         )
         return schemas.PostArtefactExistsResponse(exists=exists)
 
@@ -67,16 +66,16 @@ def copy_artefact(
         dst_tag = artefact.dst_artefact_tag or artefact.src_artefact_tag
 
         success = SkopeoClient.copy_artefact(
-            src_registry=artefact.src_registry,
+            src_registry_url=artefact.src_registry_url,
             src_artefact_name=artefact.src_artefact_name,
             src_artefact_tag=artefact.src_artefact_tag,
-            dst_registry=artefact.dst_registry,
+            dst_registry_url=artefact.dst_registry_url,
             dst_artefact_name=dst_name,
             dst_artefact_tag=dst_tag,
-            src_username=artefact.src_username,
-            src_password=artefact.src_password,
-            dst_username=artefact.dst_username,
-            dst_password=artefact.dst_password
+            src_registry_username=artefact.src_registry_username,
+            src_registry_password=artefact.src_registry_password,
+            dst_registry_username=artefact.dst_registry_username,
+            dst_registry_password=artefact.dst_registry_password
         )
         return schemas.PostCopyArtefactResponse(success=success)
     except RuntimeError as e:
