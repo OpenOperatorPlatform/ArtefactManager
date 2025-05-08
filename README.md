@@ -2,19 +2,66 @@
 
 **Work in Progress (WIP)**
 
-This repository contains the **Artefact Manager**, which is currently under active development. The artefact Manager is responsible for handling artefacts efficiently, supporting various operations such as storage, retrieval, and transfer.
+This repository hosts the **Artefact Manager**, a service currently under active development. The Artefact Manager is responsible for managing artefacts, supporting operations such as retrieval and transfer.
 
 ## Architecture
 
-The high-level architecture of the artefact Manager is depicted below:
+The high-level architecture of the Artefact Manager is illustrated below:
 
 ![Architecture](docs/images/architecture.drawio.png)
 
-More details on the design and functionality will be added as the project evolves.
+## Deployment Options
+
+You can run the Artefact Manager either **locally** or using *z*Docker**.
+
+### 📦 Local Deployment (for development)
+
+Ensure [`skopeo`](https://github.com/containers/skopeo) is installed on your system.
+
+Then start the service with:
+
+```bash
+uvicorn src.api.api:app --reload
+```
+
+This will launch the FastAPI server with hot-reloading on code changes.
+
+---
+
+### 🐳 Docker-Based Deployment
+
+#### 1. Build the Docker image
+
+```bash
+docker build -t artefact-manager:<TAG> .
+```
+
+#### 2. Run in development mode (hot-reload)
+
+```bash
+docker run -p 8000:8000 \
+  -v $(pwd)/src:/app/src \
+  -v $(pwd)/requirements.txt:/app/requirements.txt \
+  -e PYTHONPATH=/app \
+  artefact-manager:<TAG> \
+  uvicorn src.api.api:app --host 0.0.0.0 --port 8000 --reload
+```
+
+#### 3. Run in production mode
+
+```bash
+docker run -d -p 8000:8000 \
+  -e PYTHONPATH=/app \
+  --name artefact-manager \
+  artefact-manager:<TAG>
+```
 
 ## Contributing
-1. **Check Guidelines at [CONTRIBUTING.md](docs/CONTRIBUTING.md).**
-2. **Create a New Branch** following the naming convention.
-3. **Develop Your Feature** inside the correct directory.
-4. **Ensure All Tests Pass**  before the merge.
-5. **Submit a Merge Request (MR)** to the `main` branch.
+
+We welcome contributions! Please follow these steps:
+
+1. Read the [contribution guidelines](docs/CONTRIBUTING.md).
+2. Create a new branch using the appropriate naming convention.
+3. Implement your feature or fix inside the correct directory.
+4. Ensure all tests pass locally before submitting.
+5. Open a Merge Request (MR) against the `main` branch.
