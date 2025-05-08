@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
-from . import schemas
+
 from src.skopeo.skopeo import SkopeoClient
+
+from . import schemas
 
 app = FastAPI(
     title="Artefact Manager API",
@@ -10,12 +12,9 @@ app = FastAPI(
     openapi_tags=[
         {
             "name": "Artefact Management",
-            "description": (
-                "Operations related to artefact management "
-                "registries."
-            )
+            "description": ("Operations related to artefact management " "registries."),
         }
-    ]
+    ],
 )
 
 
@@ -26,7 +25,7 @@ def redirect_to_docs():
 
 @app.post("/artefact-exists", tags=["Artefact Management"])
 def artefact_exists(
-    artefact: schemas.PostArtefactExists
+    artefact: schemas.PostArtefactExists,
 ) -> schemas.PostArtefactExistsResponse:
     """
     API endpoint to check if a Helm Chart or container image with a specific
@@ -38,7 +37,7 @@ def artefact_exists(
             artefact_name=artefact.artefact_name,
             artefact_tag=artefact.artefact_tag,
             registry_username=artefact.registry_username,
-            registry_password=artefact.registry_password
+            registry_password=artefact.registry_password,
         )
         return schemas.PostArtefactExistsResponse(exists=exists)
 
@@ -47,15 +46,12 @@ def artefact_exists(
     except PermissionError as e:
         raise HTTPException(status_code=401, detail=str(e))
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail="Uncategorized error: " + str(e)
-        )
+        raise HTTPException(status_code=500, detail="Uncategorized error: " + str(e))
 
 
 @app.post("/copy-artefact", tags=["Artefact Management"])
 def copy_artefact(
-    artefact: schemas.PostCopyArtefact
+    artefact: schemas.PostCopyArtefact,
 ) -> schemas.PostCopyArtefactResponse:
     """
     API Endpoint to copy a Helm Chart/container image from one registry
@@ -75,7 +71,7 @@ def copy_artefact(
             src_registry_username=artefact.src_registry_username,
             src_registry_password=artefact.src_registry_password,
             dst_registry_username=artefact.dst_registry_username,
-            dst_registry_password=artefact.dst_registry_password
+            dst_registry_password=artefact.dst_registry_password,
         )
         return schemas.PostCopyArtefactResponse(success=success)
     except RuntimeError as e:

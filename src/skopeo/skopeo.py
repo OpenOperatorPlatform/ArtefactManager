@@ -1,5 +1,5 @@
-import subprocess
 import json
+import subprocess
 from typing import Optional
 
 
@@ -8,13 +8,14 @@ class SkopeoClient:
     Skopeo client that sends requests to the Skopeo CLI to interact with
     artefact registries.
     """
+
     @staticmethod
     def artefact_exists(
         registry_url: str,
         artefact_name: str,
         artefact_tag: str,
         registry_username: Optional[str] = None,
-        registry_password: Optional[str] = None
+        registry_password: Optional[str] = None,
     ) -> bool:
         """
         Checks if a specific artefact tag exists in a artefact registry
@@ -32,18 +33,17 @@ class SkopeoClient:
         """
         full_repo_url = f"{registry_url.rstrip('/')}/{artefact_name}"
         skopeo_command = [
-            "skopeo", "inspect", f"docker://{full_repo_url}:{artefact_tag}"
+            "skopeo",
+            "inspect",
+            f"docker://{full_repo_url}:{artefact_tag}",
         ]
         if registry_username and registry_password:
-            skopeo_command.extend(["--creds", f"{registry_username}:{registry_password}"])
+            skopeo_command.extend(
+                ["--creds", f"{registry_username}:{registry_password}"]
+            )
 
         try:
-            subprocess.run(
-                skopeo_command,
-                check=True,
-                capture_output=True,
-                text=True
-            )
+            subprocess.run(skopeo_command, check=True, capture_output=True, text=True)
             return True  # If the command succeeds, the artefact exists
 
         except subprocess.CalledProcessError as e:
@@ -52,16 +52,11 @@ class SkopeoClient:
             # Check which built-in exceptions to raise
 
             if (
-                "invalid username/password" in error_message or
-                "unauthorized" in error_message
+                "invalid username/password" in error_message
+                or "unauthorized" in error_message
             ):
                 raise PermissionError(
-                    (
-                        (
-                            "Authentication failed: Invalid username or "
-                            "password."
-                        )
-                    )
+                    (("Authentication failed: Invalid username or " "password."))
                 )
             if "not found" in error_message:
                 raise RuntimeError(
@@ -74,24 +69,16 @@ class SkopeoClient:
                 )
 
                 raise RuntimeError(
-                    (
-                        f"DNS resolution failed: Unable to resolve "
-                        f"'{registry_url}'."
-                    )
+                    (f"DNS resolution failed: Unable to resolve " f"'{registry_url}'.")
                 )
-                raise RuntimeError(
-                    "Network error: Unable to reach the registry."
-                )
+                raise RuntimeError("Network error: Unable to reach the registry.")
 
             if (
-                "no such host" in error_message or
-                "name or service not known" in error_message
+                "no such host" in error_message
+                or "name or service not known" in error_message
             ):
                 raise RuntimeError(
-                    (
-                        f"DNS resolution failed: Unable to resolve "
-                        f"'{registry_url}'."
-                    )
+                    (f"DNS resolution failed: Unable to resolve " f"'{registry_url}'.")
                 )
 
             return False
@@ -110,17 +97,15 @@ class SkopeoClient:
         src_registry_username: Optional[str] = None,
         src_registry_password: Optional[str] = None,
         dst_registry_username: Optional[str] = None,
-        dst_registry_password: Optional[str] = None
+        dst_registry_password: Optional[str] = None,
     ) -> bool:
         """
         Copies an artefact from one registry to another using Skopeo.
         """
         src_url = (
-            (
-                f"docker://{src_registry_url.rstrip('/')}/"
-                f"{src_artefact_name}:"
-                f"{src_artefact_tag}"
-            )
+            f"docker://{src_registry_url.rstrip('/')}/"
+            f"{src_artefact_name}:"
+            f"{src_artefact_tag}"
         )
         dst_url = (
             f"docker://{dst_registry_url.rstrip('/')}/"
@@ -145,19 +130,16 @@ class SkopeoClient:
             )
 
         try:
-            subprocess.run(
-                skopeo_command,
-                check=True,
-                capture_output=True,
-                text=True
-            )
+            subprocess.run(skopeo_command, check=True, capture_output=True, text=True)
             return True  # If the command succeeds, the artefact was copied
 
         except subprocess.CalledProcessError as e:
             error_message = e.stderr.strip().lower()
 
-            if ("invalid username/password" in error_message or
-                    "unauthorized" in error_message):
+            if (
+                "invalid username/password" in error_message
+                or "unauthorized" in error_message
+            ):
                 raise RuntimeError(
                     "Authentication failed: Invalid username or password."
                 )
@@ -171,16 +153,16 @@ class SkopeoClient:
                 )
 
             if (
-                "no route to host" in error_message or
-                "connection refused" in error_message
+                "no route to host" in error_message
+                or "connection refused" in error_message
             ):
                 raise RuntimeError(
                     "Network error: Unable to reach one of the registries."
                 )
 
             if (
-                "no such host" in error_message or
-                "name or service not known" in error_message
+                "no such host" in error_message
+                or "name or service not known" in error_message
             ):
                 raise RuntimeError(
                     f"DNS resolution failed: Unable to resolve "
