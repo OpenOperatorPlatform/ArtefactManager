@@ -33,7 +33,7 @@ This will launch the FastAPI server with hot-reloading on code changes.
 #### 1. Build the Docker image
 
 ```bash
-docker build -t artefact-manager:<TAG> .
+docker build -f deploy/Dockerfile -t artefact-manager:<TAG> .
 ```
 
 #### 2. Run in development mode (hot-reload)
