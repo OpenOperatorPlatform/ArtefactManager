@@ -12,7 +12,7 @@ The high-level architecture of the Artefact Manager is illustrated below:
 
 ## Deployment Options
 
-You can run the Artefact Manager either **locally** or using *z*Docker**.
+You can run the Artefact Manager either **locally** or in a container-fashion with **Docker** or **Kubernetes**.
 
 ### 📦 Local Deployment (for development)
 
