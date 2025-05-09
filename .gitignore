@@ -2,3 +2,5 @@
 docs/skopeo-docs
 *.sh
 *.pyc
+.vscode
+/tmp
