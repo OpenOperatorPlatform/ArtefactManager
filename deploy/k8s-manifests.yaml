@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +16,7 @@ spec:
     spec:
       containers:
       - name: artefact-manager
-        image: docker pull ghcr.io/sunriseopenoperatorplatform/artefactmanager:0.5
+        image: ghcr.io/sunriseopenoperatorplatform/artefactmanager:0.5
         ports:
         - containerPort: 8000
         env:
