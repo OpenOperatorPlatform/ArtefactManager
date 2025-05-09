@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: artefact-manager
+  namespace: artefact-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: artefact-manager
+  template:
+    metadata:
+      labels:
+        app: artefact-manager
+    spec:
+      containers:
+      - name: artefact-manager
+        image: docker pull ghcr.io/sunriseopenoperatorplatform/artefactmanager:0.5
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PYTHONPATH
+          value: "/app"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: artefact-manager-service
+  namespace: artefact-manager
+spec:
+  type: NodePort
+  selector:
+    app: artefact-manager
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+    nodePort: 30080  # Optional, must be between 30000–32767. Omit to let Kubernetes assign.

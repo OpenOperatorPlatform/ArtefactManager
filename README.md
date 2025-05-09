@@ -56,6 +56,29 @@ docker run -d -p 8000:8000 \
   artefact-manager:<TAG>
 ```
 
+---
+
+### ☸️ Kubernetes-Based Deployment
+
+You can also deploy the Artefact Manager in a Kubernetes cluster using the provided manifests.
+
+#### 1. Create the namespace
+
+```bash
+kubectl create namespace artefact-manager
+```
+
+#### 2. Deploy the application
+
+```bash
+kubectl create -f deploy/k8s-manifests.yaml
+```
+
+This will create a Deployment and expose the service via a `NodePort` on port `30080`. You can access it using:
+
+```
+http://<NODE_IP>:30080
+```
 ## Contributing
 
 We welcome contributions! Please follow these steps:
